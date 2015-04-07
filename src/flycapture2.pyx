@@ -102,6 +102,69 @@ cdef class Context:
              "firmware_build_time": i.firmwareBuildTime,}
         return ret
 
+    def set_format7_configuration(self, 
+                                  fc2Mode mode,
+                                  unsigned offsetX,
+                                  unsigned int offsetY,
+                                  unsigned int width,
+                                  unsigned height,
+                                  fc2PixelFormat pixelFormat,
+                                  float percentSpeed,):                                     
+        cdef fc2Error r
+        cdef fc2Format7ImageSettings f7
+        f7.mode = mode
+        f7.offsetX = offsetX
+        f7.offsetY = offsetY
+        f7.width = width
+        f7.height = height
+        f7.pixelFormat = pixelFormat
+        with nogil:
+            r = fc2SetFormat7Configuration(self.ctx, &f7, percentSpeed)
+        raise_error(r)
+
+    def set_format7_configuration_packet(self, 
+                                  fc2Mode mode,
+                                  unsigned offsetX,
+                                  unsigned int offsetY,
+                                  unsigned int width,
+                                  unsigned height,
+                                  fc2PixelFormat pixelFormat,
+                                  unsigned int packetSize,):                                     
+        cdef fc2Error r
+        cdef fc2Format7ImageSettings f7
+        f7.mode = mode
+        f7.offsetX = offsetX
+        f7.offsetY = offsetY
+        f7.width = width
+        f7.height = height
+        f7.pixelFormat = pixelFormat
+        with nogil:
+            r = fc2SetFormat7ConfigurationPacket(self.ctx, &f7, packetSize)
+        raise_error(r)
+                               
+    def get_format7_info(self):         
+        cdef fc2Format7Info i
+        cdef fc2Error r
+        cdef BOOL supp        
+        with nogil:
+            r = fc2GetFormat7Info(self.ctx, &i, &supp)
+        raise_error(r)
+        ret = {"Pixel_width": i.maxWidth,
+                "Pixel_height": i.maxHeight,
+                "Packet_size": i.packetSize,
+                "Pixel format bit field": i.pixelFormatBitField,
+                "Percentage": i.percentage,}
+        print "Custom Format7 Info"        
+        return ret, bool(supp)
+
+    def get_format7_packet_info(self):         
+        cdef fc2Format7PacketInfo f7pi
+        cdef fc2Error r
+        ret = { "Recommended Bytes/packet": f7pi.recommendedBytesPerPacket,
+                "Maximum Bytes/packet": f7pi.maxBytesPerPacket,
+                "Unit Bytes/packet": f7pi.unitBytesPerPacket,}
+        return ret
+
     def connect(self, unsigned int a, unsigned int b,
             unsigned int c, unsigned int d):
         cdef fc2PGRGuid g
